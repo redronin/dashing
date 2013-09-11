@@ -7,6 +7,9 @@ require 'sass'
 require 'json'
 require 'yaml'
 
+
+FIREBASE_URL = nil
+
 SCHEDULER = Rufus::Scheduler.start_new
 
 set :root, Dir.pwd
@@ -124,9 +127,10 @@ end
 def send_event(id, body, target=nil)
   body[:id] = id
   body[:updatedAt] ||= Time.now.to_i
-  event = format_event(body.to_json, target)
-  Sinatra::Application.settings.history[id] = event unless target == 'dashboards'
-  Sinatra::Application.settings.connections.each { |out| out << event }
+
+  raise StandardError, "FIREBASE_URL is not set" if FIREBASE_URL.nil?
+  url = File.join(FIREBASE_URL, "#{id}.json")
+  response = HTTParty.put(url, :body => body.to_json)
 end
 
 def format_event(body, name=nil)
