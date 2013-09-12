@@ -9,6 +9,7 @@ require 'yaml'
 
 
 FIREBASE_URL = nil
+FIREBASE_SECRET = nil
 
 SCHEDULER = Rufus::Scheduler.start_new
 
@@ -129,7 +130,7 @@ def send_event(id, body, target=nil)
   body[:updatedAt] ||= Time.now.to_i
 
   raise StandardError, "FIREBASE_URL is not set" if FIREBASE_URL.nil?
-  url = File.join(FIREBASE_URL, "#{id}.json")
+  url = File.join(FIREBASE_URL, "#{id}.json?auth=#{FIREBASE_SECRET}")
   response = HTTParty.put(url, :body => body.to_json)
 end
 
